@@ -16,15 +16,15 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import colours from "../colours";
-import { useState } from "react";
+import colours from "./colours";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+// import DeviceInfo from 'react-native-device-info';
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
 
 // import FloatingButton from './FloatingButton';
-// import DeviceInfo from 'react-native-device-info';
-
-export default function TabTwoScreen() {
+export default function edit_song() {
   const colorScheme = useColorScheme();
   var pos: any = {
     name: "",
@@ -48,6 +48,7 @@ export default function TabTwoScreen() {
   const [album, setAlbum] = useState("");
   const [language, setLanguage] = useState("");
   const [video_url, setVideo_url] = useState("");
+  const [id, setId] = useState("");
   const submit = () => {
     if (!serial_no) {
       Alert.alert("Please Enter Song No.");
@@ -56,18 +57,19 @@ export default function TabTwoScreen() {
     } else if (!song) {
       Alert.alert("Please Enter Song Lyrics");
     } else {
-      fetch("http://13.60.52.40/save_song", {
+      fetch("http://13.60.52.40/update_song", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: name,
+          id: id,
           song: song,
           serial_no: serial_no,
           artist: artist,
           image: image,
-          index: serial_no,
+          index: index,
           album: album,
           language: language,
           video_url: video_url,
@@ -76,50 +78,58 @@ export default function TabTwoScreen() {
         .then((response) => response.json())
         .then((data) => {
           if (data.status == "success") {
-            setName("");
-            setSong("");
-            setSerial_no("");
-            setArtist("");
-            setImage("");
-            setIndex("");
-            setAlbum("");
-            setLanguage("");
-            setVideo_url("");
-            Alert.alert("Song Added Successfully");
+            Alert.alert("Song Updated Successfully");
           } else {
             Alert.alert(data.message);
           }
         });
     }
   };
-  const clear = () => {
-    setName("");
-    setSong("");
-    setSerial_no("");
-    setArtist("");
-    setImage("");
-    setIndex("");
-    setAlbum("");
-    setLanguage("");
-    setVideo_url("");
+  const clear = async () => {
+    try {
+      const value = await AsyncStorage.getItem("song");
+      if (value !== null) {
+        // We have data!!
+        let val = JSON.parse(value);
+        setSerial_no(String(val.serial_no));
+        setName(val.name);
+        setId(val.id);
+        setSong(val.song);
+        setArtist(val.artist);
+        setImage(val.image);
+        setIndex(val.index);
+        setAlbum(val.album);
+        setLanguage(val.language);
+        setVideo_url(val.video_url);
+      }
+    } catch (error) {
+      // Error retrieving data
+    }
   };
-  const set_name = (item: any, name: any) => {
-    // // Get the device's unique ID (IMEI on Android, IDFV on iOS)
-    // const uniqueId = DeviceInfo.getUniqueId();
-    // console.log('Unique ID:', uniqueId);
-    // // Get the device's model (e.g., iPhone X, Samsung Galaxy S10)
-    // const deviceModel = DeviceInfo.getModel();
-    // console.log('Device Model:', deviceModel);
-    // // Get the device's brand (e.g., Apple, Samsung)
-    // const deviceBrand = DeviceInfo.getBrand();
-    // console.log('Device Brand:', deviceBrand);
-    // // Get the device's system name (e.g., iOS, Android)
-    // const systemName = DeviceInfo.getSystemName();
-    // console.log('System Name:', systemName);
-    // // Get the device's system version (e.g., 14.5, 11)
-    // const systemVersion = DeviceInfo.getSystemVersion();
-    // console.log('System Version:', systemVersion);
+  const _retrieveData = async () => {
+    try {
+      const value = await AsyncStorage.getItem("song");
+      if (value !== null) {
+        // We have data!!
+        let val = JSON.parse(value);
+        setSerial_no(String(val.serial_no));
+        setName(val.name);
+        setId(val.id);
+        setSong(val.song);
+        setArtist(val.artist);
+        setImage(val.image);
+        setIndex(val.index);
+        setAlbum(val.album);
+        setLanguage(val.language);
+        setVideo_url(val.video_url);
+      }
+    } catch (error) {
+      // Error retrieving data
+    }
   };
+  useEffect(() => {
+    _retrieveData();
+  }, []);
 
   return (
     <ScrollView
@@ -131,40 +141,10 @@ export default function TabTwoScreen() {
     >
       <View>
         {/* <Text > Demo Form </Text> */}
-        <Text
-          style={{
-            color: Colors[colorScheme ?? "light"].text,
-
-            fontSize: 30,
-            lineHeight: 45,
-            fontWeight: "bold",
-            paddingTop: 40,
-            paddingLeft: 30,
-            paddingBottom: 0,
-            shadowOpacity: 0.6,
-            shadowRadius: 3,
-            shadowOffset: {
-              height: 0,
-              width: 0,
-            },
-          }}
-        >
-          Add Song
-        </Text>
+        {/* <Text style={styles.songHeading}>Add Song</Text> */}
         <View>
           <TextInput
-            style={{
-              fontSize: 16,
-              color: colours.tertiaryBlack,
-              borderColor: colours.primaryTeal,
-              marginTop: 20,
-              marginLeft: 20,
-              marginRight: 20,
-              paddingLeft: 20,
-              backgroundColor: colours.primaryWhite,
-              borderRadius: 20,
-              height: 40,
-            }}
+            style={styles.TextInput}
             onChangeText={(changedText) => setSerial_no(changedText)}
             keyboardType="numeric"
             value={serial_no}
@@ -173,18 +153,7 @@ export default function TabTwoScreen() {
             clearButtonMode="always"
           />
           <TextInput
-            style={{
-              fontSize: 16,
-              color: colours.tertiaryBlack,
-              borderColor: colours.primaryTeal,
-              marginTop: 20,
-              marginLeft: 20,
-              marginRight: 20,
-              paddingLeft: 20,
-              backgroundColor: colours.primaryWhite,
-              borderRadius: 20,
-              height: 40,
-            }}
+            style={styles.TextInput}
             onChangeText={(changedText) => setName(changedText)}
             value={name}
             placeholder="Song Name"
@@ -192,18 +161,7 @@ export default function TabTwoScreen() {
             clearButtonMode="always"
           />
           <TextInput
-            style={{
-              fontSize: 16,
-              color: colours.tertiaryBlack,
-              borderColor: colours.primaryTeal,
-              marginTop: 20,
-              marginLeft: 20,
-              marginRight: 20,
-              paddingLeft: 20,
-              backgroundColor: colours.primaryWhite,
-              borderRadius: 20,
-              height: 40,
-            }}
+            style={styles.TextInput}
             onChangeText={(changedText) => setArtist(changedText)}
             value={artist}
             placeholder="Artist Name"
@@ -211,18 +169,7 @@ export default function TabTwoScreen() {
             clearButtonMode="always"
           />
           <TextInput
-            style={{
-              fontSize: 16,
-              color: colours.tertiaryBlack,
-              borderColor: colours.primaryTeal,
-              marginTop: 20,
-              marginLeft: 20,
-              marginRight: 20,
-              paddingLeft: 20,
-              backgroundColor: colours.primaryWhite,
-              borderRadius: 20,
-              height: 40,
-            }}
+            style={styles.TextInput}
             onChangeText={(changedText) => setAlbum(changedText)}
             value={album}
             placeholder="Album Name"
@@ -230,18 +177,7 @@ export default function TabTwoScreen() {
             clearButtonMode="always"
           />
           <TextInput
-            style={{
-              fontSize: 16,
-              color: colours.tertiaryBlack,
-              borderColor: colours.primaryTeal,
-              marginTop: 20,
-              marginLeft: 20,
-              marginRight: 20,
-              paddingLeft: 20,
-              backgroundColor: colours.primaryWhite,
-              borderRadius: 20,
-              height: 40,
-            }}
+            style={styles.TextInput}
             onChangeText={(changedText) => setLanguage(changedText)}
             value={language}
             placeholder="Language"
@@ -249,18 +185,7 @@ export default function TabTwoScreen() {
             clearButtonMode="always"
           />
           <TextInput
-            style={{
-              fontSize: 16,
-              color: colours.tertiaryBlack,
-              borderColor: colours.primaryTeal,
-              marginTop: 20,
-              marginLeft: 20,
-              marginRight: 20,
-              paddingLeft: 20,
-              backgroundColor: colours.primaryWhite,
-              borderRadius: 20,
-              height: 40,
-            }}
+            style={styles.TextInput}
             onChangeText={(changedText) => setImage(changedText)}
             value={image}
             placeholder="Image URL"
@@ -268,18 +193,7 @@ export default function TabTwoScreen() {
             clearButtonMode="always"
           />
           <TextInput
-            style={{
-              fontSize: 16,
-              color: colours.tertiaryBlack,
-              borderColor: colours.primaryTeal,
-              marginTop: 20,
-              marginLeft: 20,
-              marginRight: 20,
-              paddingLeft: 20,
-              backgroundColor: colours.primaryWhite,
-              borderRadius: 20,
-              height: 40,
-            }}
+            style={styles.TextInput}
             onChangeText={(changedText) => setVideo_url(changedText)}
             value={video_url}
             placeholder="Video URL"
@@ -345,9 +259,35 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   safeView: {},
-  TextInput: {},
 
-  songHeading: {},
+  TextInput: {
+    fontSize: 16,
+    color: colours.tertiaryBlack,
+    borderColor: colours.primaryTeal,
+    marginTop: 20,
+    marginLeft: 20,
+    marginRight: 20,
+    paddingLeft: 20,
+    backgroundColor: colours.primaryWhite,
+    borderRadius: 20,
+    height: 40,
+  },
+
+  songHeading: {
+    color: colours.primaryWhite,
+    fontSize: 30,
+    lineHeight: 45,
+    fontWeight: "bold",
+    paddingTop: 10,
+    paddingLeft: 30,
+    paddingBottom: 0,
+    shadowOpacity: 0.6,
+    shadowRadius: 3,
+    shadowOffset: {
+      height: 0,
+      width: 0,
+    },
+  },
   button_1: {
     alignItems: "center",
     justifyContent: "center",
