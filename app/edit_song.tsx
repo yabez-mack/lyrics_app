@@ -57,7 +57,7 @@ export default function edit_song() {
     } else if (!song) {
       Alert.alert("Please Enter Song Lyrics");
     } else {
-      fetch("http://13.60.52.40/update_song", {
+      fetch("http://13.51.234.210:8000/lyric/update_song", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

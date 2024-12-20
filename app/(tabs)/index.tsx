@@ -10,6 +10,7 @@ import {
   Alert,
   Pressable,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -41,27 +42,43 @@ export default function HomeScreen() {
   const router = useRouter();
   var pos: any;
   let text = "";
+  const [loading, setLoading] = useState(false);
   const [defaults, setDefault] = useState(pos);
   const [posts, setPosts] = useState(pos);
   useEffect(() => {
     get_songs();
   }, []);
-  const get_songs = () => {
-    fetch("http://13.60.52.40/get_song_name", {
-      method: "POST",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setPosts(data.data);
-        setDefault(data.data);
-      });
+ 
+  const get_songs = async () => {
+    
+    setLoading(true);
+    try {
+      const response = await fetch('http://13.51.234.210:8000/lyric/get_songs'
+        , {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            
+          }),
+        }
+      );
+      const json = await response.json();
+      setPosts(json?.data);
+      setDefault(json?.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
   const delete_song = (item: any) => {
     let body: any;
     body = {
       id: item,
     };
-    fetch("http://13.60.52.40/delete_song", {
+    fetch("http://13.51.234.210:8000/lyric/delete_song", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -140,6 +157,10 @@ export default function HomeScreen() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      {loading==true? <View style={styles.loading}>
+      <ActivityIndicator size='large' />
+    </View>:''}
+      
       <SafeAreaProvider
         style={{
           backgroundColor:
@@ -404,6 +425,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexWrap: "nowrap",
     color: colours.primaryWhite,
+  },
+  loading: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    zIndex:1,
+    alignItems: 'center',
+    justifyContent: 'center',
+   
   },
   Suggestions: {
     flex: 1,
