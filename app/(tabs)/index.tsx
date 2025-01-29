@@ -53,7 +53,7 @@ export default function HomeScreen() {
     
     setLoading(true);
     try {
-      const response = await fetch('http://13.51.234.210:8000/lyric/get_songs'
+      const response = await fetch('https://api.bcmmovement.in/lyric/get_songs'
         , {
           method: "POST",
           headers: {
@@ -78,7 +78,7 @@ export default function HomeScreen() {
     body = {
       id: item,
     };
-    fetch("http://13.51.234.210:8000/lyric/delete_song", {
+    fetch("https://api.bcmmovement.in/lyric/delete_song", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

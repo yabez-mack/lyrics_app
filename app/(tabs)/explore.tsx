@@ -56,7 +56,7 @@ export default function TabTwoScreen() {
     } else if (!song) {
       Alert.alert("Please Enter Song Lyrics");
     } else {
-      fetch("http://13.51.234.210:8000/lyric/add_song", {
+      fetch("https://api.bcmmovement.in/lyric/add_song", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
